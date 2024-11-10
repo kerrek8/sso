@@ -15,6 +15,7 @@ FROM alpine AS runner
 
 COPY --from=builder /usr/local/src/bin/sso /
 COPY ./config/config.yaml /config.yaml
+COPY .env /
 ENV CONFIG_PATH=config.yaml
 EXPOSE 44044
 CMD ["/sso"]

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL,
   pass_hash VARCHAR(256) NOT NULL
 );
-CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_idx ON users (email);
 
 CREATE TABLE IF NOT EXISTS apps (
   id SERIAL PRIMARY KEY,

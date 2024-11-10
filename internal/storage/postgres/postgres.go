@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"os"
 	"sso/internal/domain/models"
 	"sso/internal/storage"
@@ -17,7 +18,7 @@ type Storage struct {
 
 func New(storagePath string) (*Storage, error) {
 	const op = "postgres.New"
-	db, err := sql.Open("postgres", fmt.Sprintf(storagePath, os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("DB_CONTAINER"), os.Getenv("DB_PORT")))
+	db, err := sql.Open("pgx", fmt.Sprintf(storagePath, os.Getenv("PG_USERNAME"), os.Getenv("PG_PASSWORD"), os.Getenv("DB_CONTAINER"), os.Getenv("DB_PORT")))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -40,8 +41,8 @@ func (s *Storage) SaveUser(ctx context.Context, email string, passhash []byte) (
 
 	err = s.db.QueryRowContext(ctx, query, email, passhash).Scan(&uid)
 	if err != nil {
-		var postrgresErr pq.Error
-		if errors.As(err, &postrgresErr) && postrgresErr.Code.Name() == "unique_violation" {
+		var postrgresErr *pgconn.PgError
+		if errors.As(err, &postrgresErr) && postrgresErr.Code == "23505" {
 			return 0, fmt.Errorf("%s: %w", op, storage.ErrUserExists)
 
 		}
@@ -85,5 +86,5 @@ func (s *Storage) App(ctx context.Context, id int) (models.App, error) {
 }
 
 func (s *Storage) Close() {
-	s.db.Close()
+	_ = s.db.Close()
 }

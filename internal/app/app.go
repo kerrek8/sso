@@ -21,5 +21,5 @@ func New(log *slog.Logger, grpcPort int, storagePath string, tokenTTL time.Durat
 
 	authService := auth.New(log, storage, storage, tokenTTL)
 	grpcA := grpcApp.New(log, authService, grpcPort)
-	return &App{GRPCserver: grpcA}
+	return &App{GRPCserver: grpcA, PGstorage: storage}
 }

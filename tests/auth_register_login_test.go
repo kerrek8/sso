@@ -71,7 +71,7 @@ func TestRegisterLogin_DuplicatedRegistration(t *testing.T) {
 		Password: password,
 	})
 	require.Error(t, err)
-	assert.Empty(t, respReg.UserId)
+	assert.Empty(t, respReg)
 	assert.ErrorContains(t, err, "user already exists")
 }
 
@@ -109,7 +109,7 @@ func TestRegister_FailCases(t *testing.T) {
 			})
 			require.Error(t, err)
 			require.Contains(t, err.Error(), tt.expectedError)
-			assert.Empty(t, respReg.UserId)
+			assert.Empty(t, respReg)
 
 		})
 	}
