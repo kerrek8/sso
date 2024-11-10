@@ -1,0 +1,39 @@
+version: "3"
+dotenv: [".env"]
+
+tasks:
+  docker-build:
+    desc: "build the docker image"
+    cmds:
+      - docker build -t sso_service:local .
+  docker-run:
+    desc: "run the docker container"
+    cmds:
+      - docker run --name=sso -p 44044:44044 --network sso_service_network sso_service:local
+
+  docker-br:
+    desc: "build and run the docker container"
+    cmds:
+      - task: docker-build
+      - docker rm --force sso
+      - task: docker-run
+  build:
+    desc: "build the server"
+    cmds:
+      - go build -o ./bin/sso ./cmd/sso/main.go
+  run:
+    desc: "run the server"
+    cmds:
+      - go run ./cmd/sso/main.go --config=./config/config.yaml
+  test:
+    desc: "run the tests"
+    cmds:
+      - go test ./tests
+  main-migrations:
+    desc: "run the migrations"
+    cmds:
+      - go run ./cmd/migrator/main.go --storage-host=0.0.0.0 --storage-port=$DB_PORT --storage-user=$PG_USERNAME --storage-password=$PG_PASSWORD --migrations-path=./migrations
+  test-migrations:
+    desc: "run the migrations for testing"
+    cmds:
+      - go run ./cmd/migrator/main.go --storage-host=0.0.0.0 --storage-port=$DB_PORT --storage-user=$PG_USERNAME --storage-password=$PG_PASSWORD --migrations-path=./tests/migrations --migrations-table=migrations_test
